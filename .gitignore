@@ -7,6 +7,9 @@ secrets
 # local data
 import/
 books/
+books.db
+log_file
+log*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
