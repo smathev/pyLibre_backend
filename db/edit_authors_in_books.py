@@ -70,24 +70,52 @@ class EditAuthorsInBook(AsyncDBManager):
                 logger.error(f"Error adding author to book: {e}")
                 await session.rollback()  # Rollback on error
                 return {"status": "error", "message": str(e)}, 500
-
-    async def set_primary_author_in_book(self, author_id, book_id):
+            
+    async def set_primary_author_in_book(self, author_update_schema):
         async with self.get_session() as session:
             try:
-                # Find the book and check if the book has a primary author
-                has_primary_author = False
-                current_primary_author = 0
-                pass
-                if has_primary_author:
-                    # Set the primary author
-                    # remove primary author
-                    pass
-                else:
-                    # set primary author
-                    pass
+                # Extract book_id and author_id from the schema
+                book_id = author_update_schema.book_id
+                author_id = author_update_schema.author_id
 
-                return {"status": "success", "message": "Author added to book"}
+                # Check if there is a primary author for the book
+                current_primary_author = await session.execute(
+                    select(BookAuthorLinks)
+                    .filter_by(book_id=book_id, primary_author=1)
+                )
+                current_primary_author = current_primary_author.scalars().first()
+
+                # If there is a current primary author, unset them
+                if current_primary_author:
+                    current_primary_author.primary_author = 0
+                    await session.commit()
+
+                # Now set the new author as the primary author
+                new_primary_author_link = await session.execute(
+                    select(BookAuthorLinks)
+                    .filter_by(book_id=book_id, author_id=author_id)
+                )
+                new_primary_author_link = new_primary_author_link.scalars().first()
+
+                # If the author is already linked to the book, update the primary flag
+                if new_primary_author_link:
+                    new_primary_author_link.primary_author = 1
+                else:
+                    # If the author is not yet linked to the book, create a new link
+                    new_primary_author_link = BookAuthorLinks(
+                        book_id=book_id,
+                        author_id=author_id,
+                        primary_author=1
+                    )
+                    session.add(new_primary_author_link)
+
+                # Commit the changes
+                await session.commit()
+
+                return {"status": "success", "message": "Primary author changed successfully"}
 
             except Exception as e:
-                logger.error(f"Error setting primary author: {e}")
-                return {"status": "error", "message": str(e)}, 500
+                await session.rollback()  # Rollback if there's an error
+                logger.error(f"Error changing primary author: {e}")
+                return {"status": "error", "message": str(e)}
+

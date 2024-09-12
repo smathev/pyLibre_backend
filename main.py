@@ -28,7 +28,7 @@ from db.db_manager.sync_db_manager import SyncDBManager
 from werkzeug.security import generate_password_hash
 
 # Set up logging
-app_logger = AppLogger("AppLogger", "MyFastAPIApp")
+app_logger = AppLogger("AppLogger", "MyFastAPIApp", 'ERROR')
 
 # Intercept logs from uvicorn
 logging.getLogger("uvicorn").handlers = [InterceptHandler()]

@@ -22,27 +22,36 @@ edit_book_authors_processor = EditAuthorsInBook()
 
 save_all_details_processor = BookDetailUpdater()
 
-@router.post('/edit_book/add_author_to_book/', response_model=AddDeleteAuthorResponse, status_code=200, description="Add an author to a book", summary="Add an author to a book", tags=["Edit Book"])
-async def add_author_to_book(author_update_schema: AddDeleteAuthorSchema): #, book_id: int, author_id: int):
+@router.post('/edit_book/{book_id}/add_author_to_book/{author_id}', response_model=AddDeleteAuthorResponse, status_code=200, description="Add an author to a book", summary="Add an author to a book", tags=["Edit Book"])
+async def add_author_to_book(book_id: int, author_id: int, author_update_schema: AddDeleteAuthorSchema):
     try:
-        #result = await edit_book_authors_processor.add_author_to_book(book_id, author_id)
+        # Update the schema with the path parameters to ensure consistency
+        author_update_schema.book_id = book_id
+        author_update_schema.author_id = author_id
+
         result = await edit_book_authors_processor.add_author_to_book(author_update_schema)
         logger.info(result)
-        return AddDeleteAuthorResponse(status="success", message="Author added successfully", data=author_update_schema)
+        return AddDeleteAuthorResponse(status="success", message="Author added successfully", data={"book_id": book_id, "author_id": author_id})
     except Exception as e:
-        logger.error(f"Error deleting author from book: {e}")
+        logger.error(f"Error adding author to book: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.post('/edit_book/{book_id}/delete_author_from_book/{author_id}', response_model=ResponseModel, status_code=200, description="Delete an author from a book", summary="Delete an author from a book", tags=["Edit Book"])
-async def delete_author_from_book(author_update_schema: AddDeleteAuthorSchema): #, book_id: int, author_id: int):
+
+
+@router.post('/edit_book/{book_id}/delete_author_from_book/{author_id}', response_model=AddDeleteAuthorResponse, status_code=200, description="Delete an author from a book", summary="Delete an author from a book", tags=["Edit Book"])
+async def delete_author_from_book(book_id: int, author_id: int, author_update_schema: AddDeleteAuthorSchema):
     try:
-        #result = await edit_book_authors_processor.delete_author_from_book(book_id, author_id)
+        # Update the schema with the path parameters to ensure consistency
+        author_update_schema.book_id = book_id
+        author_update_schema.author_id = author_id
+
         result = await edit_book_authors_processor.delete_author_from_book(author_update_schema)
         logger.info(result)
         return result
     except Exception as e:
         logger.error(f"Error deleting author from book: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
     
 @router.post('/edit_book/{book_id}/save_all_details', response_model=ResponseModel, status_code=200, description="Save all details of a book", summary="Save all details of a book", tags=["Edit Book"])
 async def save_all_details(book_id: int, new_details: BookDetails):
@@ -79,6 +88,20 @@ async def change_isbn_in_book(update_book_metadata: UpdateBookMetadata):
         return result
     except Exception as e:
         logger.error(f"Error updating ISBN of book: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+    
+@router.post('/edit_book/{book_id}/change_primary_author/{author_id}',  response_model=AddDeleteAuthorResponse, status_code=200, description="Add a genre to a book", summary="Add a genre to a book", tags=["Edit Book"])
+async def change_primary_author(book_id: int, author_id: int, author_update_schema: AddDeleteAuthorSchema):
+    try:
+        # Update the schema with the path parameters to ensure consistency
+        author_update_schema.book_id = book_id
+        author_update_schema.author_id = author_id
+
+        result = await edit_book_authors_processor.set_primary_author_in_book(author_update_schema)
+        logger.info(result)
+        return result
+    except Exception as e:
+        logger.error(f"Error changing the primary author of book: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 ########################### UNUSED might need to use later, if it's easier to individually update the records #######################################

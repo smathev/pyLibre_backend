@@ -116,7 +116,8 @@ class FetchBookDetailsFromDB(SyncDBManager):
                     authors_info = [ 
                         {
                             'author_name': book_author_link.author.name, 
-                            'author_id': book_author_link.author_id 
+                            'author_id': book_author_link.author_id,
+                            'primary_author': book_author_link.primary_author
                         }
                             for book_author_link in book.book_author_links]
                     publisher_info = [ 

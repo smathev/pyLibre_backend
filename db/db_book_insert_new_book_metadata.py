@@ -76,8 +76,14 @@ class InsertNewBookMetadata(SyncDBManager):
                     date_added=current_datetime
                 )
 
+                # Check if there is already a primary author for the book
+                primary_author_exists = session.query(BookAuthorLinks).filter_by(book_id=new_book.id, primary_author=1).first()
+
+                # If no primary author exists, make the current author the primary author
+                primary_author_flag = 1 if not primary_author_exists else 0
+
                 # Associate the Author with the book through BookAuthorLinks
-                author_of_book = BookAuthorLinks(author=author, book=new_book)
+                author_of_book = BookAuthorLinks(author=author, book=new_book, primary_author=primary_author_flag)
                 session.add(author_of_book)
 
                 if publisher is not None:

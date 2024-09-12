@@ -6,16 +6,17 @@ from models.utils_path_manager import path_manager
 log_file_full_path = path_manager.log_file_full_path
 
 class AppLogger:
-    def __init__(self, logger_name, application_name):
+    def __init__(self, logger_name, application_name, logging_level):
         self.logger_name = logger_name
         self.application_name = application_name
+        self.logging_level = logging_level
 
         logger.configure(
             handlers=[
                 {
                     "sink": sys.stdout,
                     "format": "<yellow>{time:YYYY-MM-DD HH:mm:ss}</yellow> | <level>{level}</level> | <cyan>{name}</cyan> - <level>{message}</level>",
-                    "level": "INFO",  # Set minimum logging level to INFO
+                    "level": self.logging_level,  # Set minimum logging level to INFO
                     "backtrace": False,  # Disable deep tracebacks
                     "diagnose": False    # Disable detailed variable inspection
                 },

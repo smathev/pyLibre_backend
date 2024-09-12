@@ -21,6 +21,9 @@ from db.classDefinitions.remote_auth_token import RemoteAuthToken
 from db.classDefinitions.author import Author
 from db.classDefinitions.book_author_links import BookAuthorLinks
 
+from db.classDefinitions.genres import Genres
+from db.classDefinitions.book_genre_links import BookGenreLinks
+
 from sqlalchemy.orm import relationship, backref
 from loguru import logger
 
@@ -47,6 +50,11 @@ class ConfigureRelationships:
             Author.book_author_links = relationship("BookAuthorLinks", back_populates="author", cascade="all, delete, save-update")
             BookAuthorLinks.book = relationship("Book", back_populates="book_author_links", cascade="save-update")
             BookAuthorLinks.author = relationship("Author", back_populates="book_author_links", cascade="save-update")
+            
+            Book.book_genre_links = relationship("BookGenreLinks", back_populates="book", cascade="all, delete, save-update")
+            Genres.book_genre_links = relationship("BookGenreLinks", back_populates="genre", cascade="all, delete, save-update")            
+            BookGenreLinks.book = relationship("Book", back_populates="book_genre_links", cascade="save-update")
+            BookGenreLinks.genre = relationship("Genres", back_populates="book_genre_links", cascade="save-update")
 
             User.remote_auth_token = relationship('RemoteAuthToken', back_populates='user', cascade="all, delete, save-update")
             User.shelf = relationship('Shelf', back_populates='user', order_by='Shelf.shelf_name')
